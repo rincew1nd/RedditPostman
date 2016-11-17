@@ -15,22 +15,13 @@ namespace RedditPostbot.Models
     public class SubredditDataJsonModel
     {
         public string modhash;
-        public List<Topic> children;
+        public List<TopicsJsonModel> children;
         public string After;
         public string before;
     }
-    public class Topic
+    public class TopicsJsonModel
     {
         public string kind;
-        public TopicData data;
-    }
-    public class TopicData
-    {
-        public string Author;
-        public string Id;
-        public string Name;
-        public string Title;
-        public string SelfText;
-        public string Subreddit;
+        public RedditTopic data;
     }
 }

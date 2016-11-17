@@ -1,0 +1,11 @@
+{
+   "TelegramUsers": [ ],
+   "TelegramSettings": {
+      "ApiKey": ""
+   },
+   "RedditSettings": {
+      "LastSubredditsNews": {},
+      "WatchedSubreddits": []
+   }
+}
+
