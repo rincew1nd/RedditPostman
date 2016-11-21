@@ -20,7 +20,7 @@ namespace RedditPostbot
         public delegate void NewsFound(List<RedditTopic> topics);
         public event NewsFound OnNewsUpdated;
 
-        private WatchState _watchState;
+        private WatcherState _watchState;
         private object _watchStateLock = new object();
 
         private RedditSettings _redditSettings;
@@ -41,12 +41,12 @@ namespace RedditPostbot
         {
             lock (_watchStateLock)
             {
-                if (_watchState != WatchState.Stoped)
+                if (_watchState != WatcherState.Stoped)
                 {
                     throw new Exception("Reddit watcher already running!");
                 }
 
-                _watchState = WatchState.Starting;
+                _watchState = WatcherState.Starting;
                 _taskCollection = new List<Task>();
                 _redditSettings = SettingsController.SettingsStore.RedditSettings;
 
@@ -54,8 +54,8 @@ namespace RedditPostbot
                 foreach (var subreddit in SettingsController.SettingsStore.TelegramUsers.Select(u => u.Subreddits))
                     _redditSettings.WatchedSubreddits =
                         _redditSettings.WatchedSubreddits.Union(subreddit).ToList();
-
-                _watchState = WatchState.Running;
+                
+                _watchState = WatcherState.Running;
                 new Thread(GetNews).Start();
             }
         }

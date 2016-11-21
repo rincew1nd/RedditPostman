@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RedditPostbot.Enums
 {
-    public enum WatchState
+    public enum WatcherState
     {
         Stoped,
         Starting,

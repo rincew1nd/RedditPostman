@@ -56,10 +56,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\WatchState.cs" />
+    <Compile Include="Reddit\WatcherState.cs" />
     <Compile Include="Models\UserBase.cs" />
-    <Compile Include="Models\SubredditJsonModel.cs" />
-    <Compile Include="Models\RedditTopic.cs" />
+    <Compile Include="Reddit\SubredditJsonModel.cs" />
+    <Compile Include="Reddit\RedditTopic.cs" />
+    <Compile Include="Telegram\Commands\Command.cs" />
+    <Compile Include="Telegram\Commands\ICommand.cs" />
+    <Compile Include="Telegram\Commands\HelpCommand.cs" />
+    <Compile Include="Telegram\Commands\StopCommand.cs" />
+    <Compile Include="Telegram\Commands\UnsubscribeCommand.cs" />
+    <Compile Include="Telegram\Commands\SubscribeCommand.cs" />
     <Compile Include="Telegram\TelegramUser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

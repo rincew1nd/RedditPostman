@@ -21,13 +21,13 @@ namespace RedditPostbot
         
         private const string SubredditUrl = "https://www.reddit.com/r/{0}/new.json";
         private const string SubredditUrlParametrs = "https://www.reddit.com/r/{0}/new.json?before={1}&after={2}";
-
-        private readonly RedditSettings _redditSettings;
+        
+        private readonly Hashtable _subredditsLastestNews;
 
         public SubredditParser()
         {
             _webClient = new WebClient();
-            _redditSettings = SettingsController.SettingsStore.RedditSettings;
+            _subredditsLastestNews = SettingsController.SettingsStore.RedditSettings.LastSubredditsNews;
         }
 
         public static SubredditParser GetInstance()
@@ -41,29 +41,50 @@ namespace RedditPostbot
 
         public List<RedditTopic> GetSubredditNewTopics(string subreddit)
         {
-            string rawJson;
-            
+            var subredditLastNewsId = GetSubredditLastNewsId(subreddit);
+
+            var rawJson = GetSubredditJson(subreddit, subredditLastNewsId);
+            var model = new JavaScriptSerializer().Deserialize<SubredditJsonModel>(rawJson);
+
+            UpdateLastNewsId(model, subredditLastNewsId);
+            return model.data.children.Select(z => z.data).ToList();
+        }
+        
+        public void AddNewSubreddit(string subreddit)
+        {
+            if (GetSubredditLastNewsId(subreddit) != null) return;
+
+            var rawJson = GetSubredditJson(subreddit);
+            var model = new JavaScriptSerializer().Deserialize<SubredditJsonModel>(rawJson);
+            UpdateLastNewsId(model);
+        }
+
+        private string GetSubredditJson(string subreddit, string lastId = null)
+        {
             lock (_webClientLock)
             {
-                rawJson =
-                    _webClient.DownloadString(_redditSettings.LastSubredditsNews.ContainsKey(subreddit)
-                        ? string.Format(SubredditUrlParametrs, subreddit,
-                            _redditSettings.LastSubredditsNews[subreddit], "")
-                        : string.Format(SubredditUrl, subreddit));
+                var url = lastId == null ?
+                    string.Format(SubredditUrl, subreddit) :
+                    string.Format(SubredditUrlParametrs, subreddit, lastId, null);
+                return _webClient.DownloadString(url);
             }
+        }
 
-            var model = new JavaScriptSerializer().Deserialize<SubredditJsonModel>(rawJson);
-            if (model.data.children.Any())
-            {
-                if (_redditSettings.LastSubredditsNews.ContainsKey(subreddit))
-                    _redditSettings.LastSubredditsNews[subreddit] =
-                        model.data.children.First().data.Name;
-                else
-                    _redditSettings.LastSubredditsNews.Add(subreddit,
-                        model.data.children.First().data.Name);
-            }
+        private void UpdateLastNewsId(SubredditJsonModel model, string subredditLastNewsId = null)
+        {
+            if (!model.data.children.Any()) return;
 
-            return model.data.children.Select(z => z.data).ToList();
+            var lastNews = model.data.children.First().data;
+            if (string.IsNullOrEmpty(subredditLastNewsId))
+                _subredditsLastestNews.Add(lastNews.Subreddit, lastNews.Name);
+            else
+                _subredditsLastestNews[lastNews.Subreddit] = lastNews.Name;
+        }
+
+        private string GetSubredditLastNewsId(string subreddit)
+        {
+            return _subredditsLastestNews.ContainsKey(subreddit) ?
+                   _subredditsLastestNews[subreddit].ToString() : null;
         }
     }
 }
