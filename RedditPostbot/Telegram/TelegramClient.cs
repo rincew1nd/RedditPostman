@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using RedditPostbot.Models;
@@ -10,6 +11,7 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using RedditPostbot.Utils;
 
 namespace RedditPostbot.Telegram
 {
@@ -81,8 +83,10 @@ namespace RedditPostbot.Telegram
         {
             foreach (var redditTopic in topics)
             {
-                _users.Where(u => u.Subreddits.Contains(redditTopic.Subreddit)).ToList()
-                    .ForEach(u => SendMessage(u.ChatId, redditTopic.MakeMessage()));
+                var users = _users.Where(
+                        u => u.Subreddits.Contains(redditTopic.Subreddit, StringComparison.OrdinalIgnoreCase)
+                    ).ToList();
+                users.ForEach(u => SendMessage(u.ChatId, redditTopic.MakeMessage()));
             }
         }
 

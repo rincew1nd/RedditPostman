@@ -18,10 +18,10 @@ namespace RedditPostbot
 
         private readonly WebClient _webClient;
         private static readonly object _webClientLock = new object();
-        
+
         private const string SubredditUrl = "https://www.reddit.com/r/{0}/new.json";
         private const string SubredditUrlParametrs = "https://www.reddit.com/r/{0}/new.json?before={1}&after={2}";
-        
+
         private readonly Hashtable _subredditsLastestNews;
 
         public SubredditParser()
@@ -46,10 +46,11 @@ namespace RedditPostbot
             var rawJson = GetSubredditJson(subreddit, subredditLastNewsId);
             var model = new JavaScriptSerializer().Deserialize<SubredditJsonModel>(rawJson);
 
+            if (model == null) return new List<RedditTopic>();
             UpdateLastNewsId(model, subredditLastNewsId);
             return model.data.children.Select(z => z.data).ToList();
         }
-        
+
         public void AddNewSubreddit(string subreddit)
         {
             if (GetSubredditLastNewsId(subreddit) != null) return;
@@ -63,10 +64,18 @@ namespace RedditPostbot
         {
             lock (_webClientLock)
             {
-                var url = lastId == null ?
-                    string.Format(SubredditUrl, subreddit) :
-                    string.Format(SubredditUrlParametrs, subreddit, lastId, null);
-                return _webClient.DownloadString(url);
+                var url = lastId == null
+                    ? string.Format(SubredditUrl, subreddit)
+                    : string.Format(SubredditUrlParametrs, subreddit, lastId, null);
+                try
+                {
+                    return _webClient.DownloadString(url);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{ex.Message} ({url})");
+                    return "";
+                }
             }
         }
 
@@ -78,7 +87,7 @@ namespace RedditPostbot
             if (string.IsNullOrEmpty(subredditLastNewsId))
                 _subredditsLastestNews.Add(lastNews.Subreddit, lastNews.Name);
             else
-                _subredditsLastestNews[lastNews.Subreddit] = lastNews.Name;
+                _subredditsLastestNews[lastNews.Subreddit.ToLower()] = lastNews.Name;
         }
 
         private string GetSubredditLastNewsId(string subreddit)

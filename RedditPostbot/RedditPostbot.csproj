@@ -76,6 +76,7 @@
     <Compile Include="Telegram\TelegramSettings.cs" />
     <Compile Include="Telegram\TelegramClient.cs" />
     <Compile Include="Reddit\SubredditParser.cs" />
+    <Compile Include="Utils\ListUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
