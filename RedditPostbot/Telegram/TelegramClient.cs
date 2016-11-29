@@ -83,6 +83,7 @@ namespace RedditPostbot.Telegram
         {
             foreach (var redditTopic in topics)
             {
+                Console.WriteLine($"{redditTopic.Subreddit} updated ({redditTopic.Name})");
                 var users = _users.Where(
                         u => u.Subreddits.Contains(redditTopic.Subreddit, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
@@ -90,9 +91,9 @@ namespace RedditPostbot.Telegram
             }
         }
 
-        public static async void SendMessage(long chatId, string message)
+        public static void SendMessage(long chatId, string message)
         {
-            await _client.SendTextMessageAsync(chatId, message, parseMode: ParseMode.Html);
+            _client.SendTextMessageAsync(chatId, message, parseMode: ParseMode.Html);
         }
     }
 }
